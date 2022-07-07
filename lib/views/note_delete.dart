@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class NoteDelete extends StatelessWidget {
+  const NoteDelete({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,7 @@ class NoteDelete extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text('No'),
+          child: const Text('No'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
