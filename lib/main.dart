@@ -1,8 +1,11 @@
 import 'package:consume_api/views/note_list.dart';
 import 'package:flutter/material.dart';
+import 'package:consume_api/service_locators.dart';
+
 
 void main() {
   runApp(const MyApp());
+  setupLocators();
 }
 
 class MyApp extends StatelessWidget {
