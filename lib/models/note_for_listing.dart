@@ -9,8 +9,8 @@ class NoteForListing {
       {this.noteID = '',
       this.noteTitle = '',
       this.noteContent = '',
-      required this.createDateTime,
-      required this.latestEditDateTime});
+      DateTime? createDateTime,
+      DateTime? latestEditDateTime}): createDateTime = createDateTime ?? DateTime.now(), latestEditDateTime = latestEditDateTime?? DateTime.now();
 
   factory NoteForListing.fromJson(Map<String, dynamic> item) {
     return NoteForListing(
@@ -19,5 +19,12 @@ class NoteForListing {
         noteContent: item['noteContent']?? '',
         createDateTime: DateTime.parse(item['createDateTime']),
         latestEditDateTime: DateTime.parse(item['createDateTime']));
+  }
+
+  Map<String, dynamic> toJson(){
+    return{
+      "noteTitle": noteTitle,
+      "noteContent": noteContent,
+    };
   }
 }

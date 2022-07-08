@@ -17,41 +17,43 @@ class NoteModify extends StatefulWidget {
 }
 
 class _NoteModifyState extends State<NoteModify> {
+  bool get isEditing => widget.noteID != '';
   final NoteService service = locator<NoteService>();
- NoteForListing? data;
+  NoteForListing? data;
   bool _isLoading = false;
   String errorMessage = '';
-  final FocusNode _messageFN = FocusNode();
+  final FocusNode _titleFN = FocusNode();
+  final FocusNode _contentFN = FocusNode();
 
   final TextEditingController _titleController = TextEditingController();
 
   final TextEditingController _contentController = TextEditingController();
 
   _fetchNote() async {
-    await service.getNote(widget.noteID)
-    .then((response){
-          setState(() {
-            _isLoading = false;
-            data = response.data;
-            _titleController.text = data!.noteTitle;
-            _contentController.text = data!.noteContent;
-          });
+    await service.getNote(widget.noteID).then((response) {
+      setState(() {
+        _isLoading = false;
+        data = response.data;
+        _titleController.text = data!.noteTitle;
+        _contentController.text = data!.noteContent;
+      });
 
-          if(response.error){
-            errorMessage = response.errorMessage;
-          }
-          // print(data!.noteID);
-        });
+      if (response.error) {
+        errorMessage = response.errorMessage;
+      }
+      // print(data!.noteID);
+    });
   }
 
   @override
   void initState() {
-    setState(() {
-      _isLoading = true;
-    });
-
-    _fetchNote();
-  // _titleController.text = data!.noteTitle;
+    if (isEditing) {
+      setState(() {
+        _isLoading = true;
+      });
+      _fetchNote();
+    }
+    // _titleController.text = data!.noteTitle;
     super.initState();
   }
 
@@ -62,57 +64,90 @@ class _NoteModifyState extends State<NoteModify> {
             title: Text(widget.noteID.isEmpty
                 ? 'Create note'
                 : 'Edit note ${widget.noteID}')),
-        body: _isLoading? const Center(child: CircularProgressIndicator()) :Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: AspectRatio(
-            aspectRatio: 4 / 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Text(data.noteID),
-                Text(data!.noteContent),
-                // Text(data!.noteID),
-                TextFormField(
-                  onFieldSubmitted: (String text) {},
-                  focusNode: _messageFN,
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8),
-                        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AspectRatio(
+                  aspectRatio: 4 / 2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Text(data.noteID),
+                      // Text(data!.noteContent),
+                      // Text(data!.noteID),
+                      TextFormField(
+                        onFieldSubmitted: (String text) {},
+                        focusNode: _titleFN,
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                            ),
+                            hintText: 'Note title'),
                       ),
-                      hintText: 'Note title'),
-                      
-                ),
-                TextFormField(
-                  onFieldSubmitted: (String text) {},
-                  focusNode: _messageFN,
-                  controller: _contentController,
-                  decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8),
-                        ),
+                      TextFormField(
+                        onFieldSubmitted: (String text) {},
+                        focusNode: _contentFN,
+                        controller: _contentController,
+                        decoration: const InputDecoration(
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                            ),
+                            hintText: 'Note content'),
                       ),
-                      hintText: 'Note content'),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Submit'),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final newNote = NoteForListing(
+                                noteTitle: _titleController.text,
+                                noteContent: _contentController.text);
+
+                            final result = await service.createNote(newNote);
+                            print(result.data);
+                            final errorCreate = result.error
+                                ? result.errorMessage
+                                : 'Your note was created.';
+
+                            dialogBox(errorCreate, result.data);
+                            
+                            //   Navigator.of(context).pop();
+                          },
+                          child: const Text('Submit'),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
-          ),
-        ));
+                ),
+              ));
   }
 
-  
+  dialogBox(String message ,result) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: const Text('Done'),
+              content: Text(message),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ]);
+        }).then((data){
+          if(result){
+            Navigator.of(context).pop();
+          }
+        });
+  }
 }
