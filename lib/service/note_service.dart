@@ -5,7 +5,7 @@ import 'dart:convert' as convert;
 
 class NoteService {
   static const api = 'https://tq-notes-api-jkrgrdggbq-el.a.run.app/notes';
-  static const headers = {"apiKey": '9d641f4a-f1f9-46c0-98db-6c632127d114'};
+  static const headers = {"apiKey": '0a3ac4e6-fac1-44cc-bdae-6c68c08d9eec'};
 
   Future<ApiResponse<List<NoteForListing>>> getNotesList() async {
     final notes = <NoteForListing>[];
@@ -14,19 +14,18 @@ class NoteService {
         final jsonResponse = convert.jsonDecode(response.body);
         
         for (var item in jsonResponse) {
-          final note = NoteForListing(
-              noteID: item['noteID'],
-              noteTitle: item['noteTitle'],
-              createDateTime: DateTime.parse(item['createDateTime']),
-              latestEditDateTime: item['latestEditDateTime'] ?? DateTime.parse(item['createDateTime']));
-              // print(note);
-          notes.add(note);
+          notes.add(NoteForListing.fromJson(item));
         }
         return ApiResponse<List<NoteForListing>>(data: notes);
       }
       return ApiResponse<List<NoteForListing>>(data: notes, error: true, errorMessage: 'An error occured');
   }
-  // Future <ApiResponse> deleteNote(id){
-
-  // }
+  Future<ApiResponse<NoteForListing>> getNote(String id) async {
+    final response = await http.get(Uri.parse('$api/$id'), headers: headers);
+    final jsonResponse = convert.jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return ApiResponse<NoteForListing>(data: NoteForListing.fromJson(jsonResponse));
+      }
+      return ApiResponse<NoteForListing>(data: NoteForListing.fromJson(jsonResponse), error: true, errorMessage: 'An error occured');
+  }
 }

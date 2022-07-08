@@ -1,10 +1,12 @@
-class ApiResponse <T>{
-  T data;
+// import 'package:consume_api/models/note_for_listing.dart';
+
+class ApiResponse <NoteForListing>{
+  NoteForListing? data;
   bool error;
   String errorMessage;
 
   ApiResponse({
-    required this.data ,
+    this.data,
     this.error = false,
     this.errorMessage = ''
   });

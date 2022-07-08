@@ -88,21 +88,21 @@ class _NoteListState extends State<NoteList> {
                   ),
                   child: ListTile(
                     title: Text(
-                      _apiResponse!.data[index].noteTitle,
+                      _apiResponse!.data![index].noteTitle,
                       style: TextStyle(color: Theme.of(context).primaryColor),
                     ),
                     subtitle: Text(formatDateTime(
-                        _apiResponse!.data[index].createDateTime)),
+                        _apiResponse!.data![index].createDateTime)),
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => NoteModify(
-                            noteID: _apiResponse!.data[index].noteID),
+                            noteID: _apiResponse!.data![index].noteID),
                       ));
                     },
                   ),
                 );
               },
-              itemCount: _apiResponse!.data.length,
+              itemCount: _apiResponse!.data!.length,
             );
           },
         ));
