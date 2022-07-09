@@ -48,4 +48,24 @@ class NoteService {
     return ApiResponse<bool>(
         data: true, error: true, errorMessage: 'An error occured');
   }
+
+  Future<ApiResponse<bool>> updateNote(String id, NoteForListing item) async {
+    final response = await http.put(Uri.parse('$api/$id'),
+        headers: headers, body: convert.jsonEncode(item.toJson()));
+    // final jsonResponse = convert.jsonDecode(response.body);
+    if (response.statusCode == 204) {
+      return ApiResponse<bool>(data: true);
+    }
+    return ApiResponse<bool>(
+        data: true, error: true, errorMessage: 'An error occured');
+  }
+  Future<ApiResponse<bool>> deleteNote(String id) async {
+    final response = await http.delete(Uri.parse('$api/$id'),
+        headers: headers,);
+    if (response.statusCode == 204) {
+      return ApiResponse<bool>(data: true);
+    }
+    return ApiResponse<bool>(
+        data: true, error: true, errorMessage: 'An error occured');
+  }
 }

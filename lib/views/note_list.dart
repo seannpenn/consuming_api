@@ -16,7 +16,7 @@ class NoteList extends StatefulWidget {
 class _NoteListState extends State<NoteList> {
   final NoteService service = locator<NoteService>();
   List<NoteForListing> notes = [];
-  ApiResponse<List<NoteForListing>> ?_apiResponse;
+  ApiResponse<List<NoteForListing>>? _apiResponse;
   bool _isLoading = false;
 
   String formatDateTime(DateTime dateTime) {
@@ -45,9 +45,11 @@ class _NoteListState extends State<NoteList> {
         appBar: AppBar(title: const Text('List of notes')),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
+            Navigator.of(context)
+                .push(MaterialPageRoute(
               builder: (context) => const NoteModify(),
-            )).then((value){
+            ))
+                .then((value) {
               _fetchNotes();
             });
           },
@@ -76,8 +78,17 @@ class _NoteListState extends State<NoteList> {
                   onDismissed: (direction) {},
                   confirmDismiss: (direction) async {
                     final result = await showDialog(
-                        context: context, builder: (context) => const NoteDelete());
-                    print(result);
+                            context: context,
+                            builder: (context) => NoteDelete(
+                                noteID: _apiResponse!.data![index].noteID))
+                        .then((value) {
+                      if (value) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                "Note successfully deleted.")));
+                      }
+                      _fetchNotes();
+                    });
                     return result;
                   },
                   background: Container(
@@ -96,10 +107,14 @@ class _NoteListState extends State<NoteList> {
                     subtitle: Text(formatDateTime(
                         _apiResponse!.data![index].createDateTime)),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
                         builder: (context) => NoteModify(
                             noteID: _apiResponse!.data![index].noteID),
-                      ));
+                      ))
+                          .then((value) {
+                        _fetchNotes();
+                      });
                     },
                   ),
                 );

@@ -73,9 +73,6 @@ class _NoteModifyState extends State<NoteModify> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Text(data.noteID),
-                      // Text(data!.noteContent),
-                      // Text(data!.noteID),
                       TextFormField(
                         onFieldSubmitted: (String text) {},
                         focusNode: _titleFN,
@@ -106,18 +103,44 @@ class _NoteModifyState extends State<NoteModify> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
+                            final updateNote = NoteForListing(
+                                noteTitle:
+                                    _titleController.text == data?.noteTitle
+                                        ? data!.noteTitle
+                                        : _titleController.text,
+                                noteContent:
+                                    _contentController.text == data?.noteContent
+                                        ? data!.noteContent
+                                        : _contentController.text);
                             final newNote = NoteForListing(
                                 noteTitle: _titleController.text,
                                 noteContent: _contentController.text);
 
-                            final result = await service.createNote(newNote);
-                            print(result.data);
-                            final errorCreate = result.error
-                                ? result.errorMessage
-                                : 'Your note was created.';
+                            if (isEditing) {
+                              final updateResult = await service.updateNote(
+                                  widget.noteID, updateNote);
+                              final errorCreate = updateResult.error
+                                  ? updateResult.errorMessage
+                                  : 'Your note was updated.';
+                              if (updateNote.noteTitle == data?.noteTitle &&
+                                  updateNote.noteContent == data?.noteContent) {
+                                print(updateResult.data);
 
-                            dialogBox(errorCreate, result.data);
-                            
+                                dialogBox('Your note has no changes.',
+                                    updateResult.data);
+                              } else {
+                                dialogBox(errorCreate, updateResult.data);
+                              }
+                            } else {
+                              final result = await service.createNote(newNote);
+                              print(result.data);
+                              final errorCreate = result.error
+                                  ? result.errorMessage
+                                  : 'Your note was created.';
+
+                              dialogBox(errorCreate, result.data);
+                            }
+
                             //   Navigator.of(context).pop();
                           },
                           child: const Text('Submit'),
@@ -129,7 +152,7 @@ class _NoteModifyState extends State<NoteModify> {
               ));
   }
 
-  dialogBox(String message ,result) {
+  dialogBox(String message, result) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -144,10 +167,10 @@ class _NoteModifyState extends State<NoteModify> {
                   child: const Text('OK'),
                 ),
               ]);
-        }).then((data){
-          if(result){
-            Navigator.of(context).pop();
-          }
-        });
+        }).then((data) {
+      if (result) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 }
